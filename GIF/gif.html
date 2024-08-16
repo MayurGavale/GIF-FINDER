@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GIFinder - Shiny Dark Theme</title>
+    <style>
+      :root {
+        --bg-color: #0a0a0a;
+        --text-color: #ffffff;
+        --primary-color: #6200ee;
+        --secondary-color: #03dac6;
+        --accent-color: #bb86fc;
+        --card-bg: rgba(255, 255, 255, 0.1);
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(98, 0, 238, 0.1) 0%,
+            transparent 20%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(3, 218, 198, 0.1) 0%,
+            transparent 20%
+          );
+        background-attachment: fixed;
+      }
+      .header {
+        background-color: rgba(98, 0, 238, 0.8);
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+      .logo {
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--text-color);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        transition: transform 0.3s ease;
+      }
+      .logo:hover {
+        transform: scale(1.05);
+      }
+      .search-container {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+      }
+      #search-input {
+        width: 300px;
+        padding: 12px;
+        font-size: 16px;
+        border: none;
+        border-radius: 25px 0 0 25px;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--text-color);
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+      }
+      #search-input:focus {
+        outline: none;
+        box-shadow: 0 0 15px var(--accent-color);
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      #search-button {
+        padding: 12px 24px;
+        font-size: 16px;
+        background-color: var(--secondary-color);
+        color: var(--bg-color);
+        border: none;
+        border-radius: 0 25px 25px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      #search-button:hover {
+        background-color: var(--accent-color);
+        box-shadow: 0 0 15px var(--accent-color);
+      }
+      #search-button:active {
+        transform: scale(0.95);
+      }
+      #gif-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 20px;
+      }
+      .gif-item {
+        margin: 10px;
+        cursor: pointer;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .gif-item:hover {
+        transform: scale(1.05) rotate(1deg);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .modal.show {
+        opacity: 1;
+      }
+      .modal-content {
+        background-color: var(--card-bg);
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transform: scale(0.7);
+        transition: transform 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+      .modal.show .modal-content {
+        transform: scale(1);
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+      .close:hover {
+        color: var(--text-color);
+      }
+      .modal-gif {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .modal-info {
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+      }
+      .button {
+        padding: 12px 18px;
+        margin-right: 10px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      .button:active {
+        transform: translateY(0);
+      }
+      .like-button {
+        background-color: var(--accent-color);
+        color: var(--bg-color);
+      }
+      .share-button {
+        background-color: var(--secondary-color);
+        color: var(--bg-color);
+      }
+      .button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .liked {
+        background-color: #ff4081;
+      }
+      .gif-container {
+        position: relative;
+        margin: 10px;
+      }
+      .rank-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: var(--primary-color);
+        color: var(--text-color);
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      .sort-container {
+        text-align: center;
+        margin-top: 20px;
+      }
+      #sort-order {
+        padding: 8px;
+        font-size: 16px;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          align-items: center;
+        }
+        .logo {
+          margin-bottom: 15px;
+        }
+        #search-input {
+          width: 200px;
+        }
+        .modal-content {
+          width: 95%;
+          margin: 10% auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">GIFinder ✨</div>
+      <nav>
+        <button class="button" id="trending-button">Trending</button>
+        <button class="button" id="random-button">Random</button>
+      </nav>
+    </header>
+
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search for GIFs..." />
+      <button id="search-button">Search</button>
+    </div>
+    <div class="sort-container">
+      <label for="sort-order">Sort order:</label>
+      <select id="sort-order">
+        <option value="desc">Descending</option>
+        <option value="asc">Ascending</option>
+      </select>
+    </div>
+    <div id="gif-container"></div>
+    <div id="gif-modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <img id="modal-gif" class="modal-gif" src="" alt="GIF" />
+        <div id="modal-hashtags" class="modal-info"></div>
+        <div id="modal-username" class="modal-info"></div>
+        <div id="modal-likes" class="modal-info"></div>
+        <button class="button like-button" id="like-button">Like</button>
+        <button class="button share-button" id="share-button">Share</button>
+      </div>
+    </div>
+
+    <script>
+      const apiKey = "umvjV7Fp6klqiu12wDxuMcYEGnjRGhk5";
+      const searchInput = document.getElementById("search-input");
+      const searchButton = document.getElementById("search-button");
+      const gifContainer = document.getElementById("gif-container");
+      const modal = document.getElementById("gif-modal");
+      const modalGif = document.getElementById("modal-gif");
+      const modalHashtags = document.getElementById("modal-hashtags");
+      const modalUsername = document.getElementById("modal-username");
+      const modalLikes = document.getElementById("modal-likes");
+      const closeModal = document.getElementsByClassName("close")[0];
+      const likeButton = document.getElementById("like-button");
+      const trendingButton = document.getElementById("trending-button");
+      const randomButton = document.getElementById("random-button");
+      const sortOrder = document.getElementById("sort-order");
+
+      searchButton.addEventListener("click", () => fetchGifs("search"));
+      closeModal.addEventListener("click", hideModal);
+      likeButton.addEventListener("click", toggleLike);
+      trendingButton.addEventListener("click", () => fetchGifs("trending"));
+      randomButton.addEventListener("click", () => fetchGifs("random"));
+
+      sortOrder.addEventListener("change", () => {
+        const gifs = Array.from(gifContainer.children);
+        gifs.sort((a, b) => {
+          const rankA = parseInt(
+            a.querySelector(".rank-badge").textContent.slice(1)
+          );
+          const rankB = parseInt(
+            b.querySelector(".rank-badge").textContent.slice(1)
+          );
+          return sortOrder.value === "asc" ? rankA - rankB : rankB - rankA;
+        });
+        gifContainer.innerHTML = "";
+        gifs.forEach((gif) => gifContainer.appendChild(gif));
+      });
+      const shareButton = document.getElementById("share-button");
+
+      shareButton.addEventListener("click", shareGif);
+
+      function shareGif() {
+        const gifUrl = modalGif.src;
+        navigator.clipboard
+          .writeText(gifUrl)
+          .then(() => {
+            const originalText = shareButton.textContent;
+            shareButton.textContent = "Copied!";
+            shareButton.disabled = true;
+            setTimeout(() => {
+              shareButton.textContent = originalText;
+              shareButton.disabled = false;
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy: ", err);
+            alert("Failed to copy GIF URL. Please try again.");
+          });
+      }
+
+      function fetchGifs(type) {
+        let url;
+        switch (type) {
+          case "search":
+            const searchTerm = searchInput.value;
+            url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${searchTerm}&limit=50`;
+            break;
+          case "trending":
+            url = `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}&limit=50`;
+            break;
+          case "random":
+            url = `https://api.giphy.com/v1/gifs/random?api_key=${apiKey}`;
+            break;
+        }
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            gifContainer.innerHTML = "";
+            if (type === "random") {
+              displayGif({ ...data.data, rank: 1 });
+            } else {
+              const rankedGifs = rankGifs(data.data);
+              rankedGifs.forEach((gif) => displayGif(gif));
+            }
+          });
+      }
+
+      function rankGifs(gifs) {
+        const rankedGifs = gifs
+          .map((gif) => {
+            const views = gif.views || 0;
+            const uploadDate = new Date(gif.import_datetime).getTime();
+            const trendingDate = gif.trending_datetime
+              ? new Date(gif.trending_datetime).getTime()
+              : 0;
+            const currentDate = new Date().getTime();
+
+            let score = views;
+            score += (currentDate - uploadDate) / (1000 * 60 * 60 * 24);
+            if (trendingDate) {
+              score += (currentDate - trendingDate) / (1000 * 60 * 60);
+            }
+
+            return { ...gif, score };
+          })
+          .sort((a, b) => b.score - a.score);
+
+        rankedGifs.forEach((gif, index) => {
+          gif.rank = index + 1;
+        });
+
+        return rankedGifs;
+      }
+
+      function displayGif(gif) {
+        const gifContainer = document.createElement("div");
+        gifContainer.classList.add("gif-container");
+
+        const img = document.createElement("img");
+        img.src = gif.images.fixed_height.url;
+        img.classList.add("gif-item");
+        img.addEventListener("click", () => showModal(gif));
+
+        const rankBadge = document.createElement("div");
+        rankBadge.classList.add("rank-badge");
+        rankBadge.textContent = `#${gif.rank}`;
+
+        gifContainer.appendChild(img);
+        gifContainer.appendChild(rankBadge);
+        document.getElementById("gif-container").appendChild(gifContainer);
+      }
+
+      function showModal(gif) {
+        modalGif.src = gif.images.original.url;
+        modalHashtags.textContent = `Hashtags: ${gif.title
+          .split(" ")
+          .map((word) => "#" + word)
+          .join(" ")}`;
+        modalUsername.textContent = `Username: ${gif.username || "Anonymous"}`;
+        modalLikes.textContent = `Likes: ${
+          gif.likes || Math.floor(Math.random() * 1000)
+        }`;
+        modal.style.display = "block";
+        setTimeout(() => modal.classList.add("show"), 10);
+        likeButton.classList.remove("liked");
+        likeButton.textContent = "Like";
+      }
+
+      function hideModal() {
+        modal.classList.remove("show");
+        setTimeout(() => (modal.style.display = "none"), 300);
+      }
+
+      function toggleLike() {
+        likeButton.classList.toggle("liked");
+        const currentLikes = parseInt(modalLikes.textContent.split(": ")[1]);
+        if (likeButton.classList.contains("liked")) {
+          modalLikes.textContent = `Likes: ${currentLikes + 1}`;
+          likeButton.textContent = "Unlike";
+        } else {
+          modalLikes.textContent = `Likes: ${currentLikes - 1}`;
+          likeButton.textContent = "Like";
+        }
+      }
+    </script>
+  </body>
+</html>
